@@ -1,0 +1,63 @@
+ mainmodule ParticleExercise {
+
+  include "Particle.h";
+  readonly CProxy_Main mainProxy;
+  readonly CProxy_Cell cellProxy;
+  readonly int elementsPerCell;
+  readonly int cellDimension;
+
+  mainchare Main {
+    entry Main(CkArgMsg* m);
+    // TODO : add an entry method to receive the reductions
+	entry [reductiontarget] void myReduction(int max_num);
+ 
+    entry void done();
+  };
+
+  array [2D] Cell {
+    entry Cell(void);
+    entry void updateNeighbor(int iter, std::vector<Particle> incoming);
+    entry void ResumeFromSync();
+    
+    // Main computation
+    entry void run() {
+        for(iteration=0; iteration<ITERATION; iteration++){
+            atomic {
+              updateParticles();
+
+              int x = thisIndex.x;
+              int y = thisIndex.y;
+              thisProxy(wrap(x), wrap(y + 1)).updateNeighbor(iteration, N);
+              thisProxy(wrap(x + 1), wrap(y)).updateNeighbor(iteration, W);
+              thisProxy(wrap(x - 1), wrap(y)).updateNeighbor(iteration, E);
+              thisProxy(wrap(x), wrap(y - 1)).updateNeighbor(iteration, S);
+            }
+
+            for(remoteNeighbors = 0; remoteNeighbors < 4; remoteNeighbors++)
+              when updateNeighbor[iteration](int iter, std::vector<Particle> incoming) atomic {
+                //Collect incoming particles
+                particles.insert(particles.end(), incoming.begin(), incoming.end());
+              }
+
+
+              if(iteration % 10 == 0){
+                atomic {
+                  int numberParticles = particles.size();
+                  //TODO: add contibute calls here
+    			        contribute(sizeof(int), &numberParticles, CkReduction::max_int);
+                  AtSync();
+                }
+                when ResumeFromSync(){ }
+              }
+
+              // TODO for part II: add code for load balancing here. (AtSync and ResumeFromSync)
+              // Refer to the slide ttiled "Example: Stencil" in the load balancing section 
+              // of the tutorial, somewhere around slide 152
+
+
+        }//end of the iteration loop
+
+        atomic{ mainProxy.done(); }
+    };
+  };
+};

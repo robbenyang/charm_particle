@@ -20,12 +20,10 @@ class Main: public CBase_Main {
 				int curr_max;
 				int counter;
 				int doneCells;
-				int totalNumParticles;
 				Main(CkArgMsg* m) {
 						curr_max = -1;
 						counter = 0;
 						doneCells = 0;
-						totalNumParticles = 0;
 						if(m->argc < 3) CkAbort("SUcmiAtGE: ./charmrun +p<number_of_processors> ./particle <number of particles per cell> <size of array>");
 
 						mainProxy = thisProxy;
@@ -56,8 +54,6 @@ class Main: public CBase_Main {
 				void done() {
 						doneCells++;
 						if(doneCells >= cellDimension*cellDimension){
-								CkPrintf("Sum = %d\n", totalNumParticles);
-								CkPrintf("Ave = %d\n", totalNumParticles/doneCells);
 								CkPrintf("EXIT %d\n", doneCells);
 								CkExit();
 						}
@@ -123,12 +119,32 @@ class Cell: public CBase_Cell {
 						yMax = RANGE * (thisIndex.y + 1 ) / cellDimension;
 				}
 
-				void populateCell(int initialElements) {
-						for(int element = 0; element < initialElements; element++) {
-								Particle p = Particle(randomWithin(xMin, xMax), randomWithin(yMin, yMax));
+				void insertRedElems(int initialElements){
+					for(int element = 0; element < initialElements; element++) {
+								Particle p = Particle(randomWithin(xMin, xMax), randomWithin(yMin, yMax), RED);
 								particles.push_back(p);
 						}
-
+				}
+				
+				void populateCell(int initialElements) {
+					int oneFourth = cellDimension / 4;
+					int threeFourth = 3 * cellDimension / 4;
+					if(thisIndex.x < cellDimension/2){
+						for(int element = 0; element < initialElements; element++) {
+								Particle p = Particle(randomWithin(xMin, xMax), randomWithin(yMin, yMax), GREEN);
+								particles.push_back(p);
+						}
+						if(thisIndex.x < oneFourth && (thisIndex.y < oneFourth || thisIndex.y >= threeFourth))
+							insertRedElems(initialElements);
+					}
+					else{
+						for(int element = 0; element < initialElements; element++) {
+								Particle p = Particle(randomWithin(xMin, xMax), randomWithin(yMin, yMax), BLUE);
+								particles.push_back(p);
+						}
+						if(thisIndex.x >= threeFourth && (thisIndex.y < oneFourth || thisIndex.y >= threeFourth))
+							insertRedElems(initialElements);
+					}
 				}
 
 				double randomWithin(double min, double max) {
@@ -146,6 +162,11 @@ class Cell: public CBase_Cell {
 						double deltax = drand48()*maxDelta - maxDelta/2.0;
 						double deltay = drand48()*maxDelta - maxDelta/2.0;
 
+						if(particle->color == BLUE || particle->color == GREEN){
+							deltax *= SPEED_FACTOR;
+							deltay *= SPEED_FACTOR;
+						}
+						
 						//particle moves into either x or into y direction randomly.
 						double direction = drand48();
 						if(direction >= 0.5 )

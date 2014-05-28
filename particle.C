@@ -6,7 +6,7 @@
 #include "ParticleExercise.decl.h"
 
 #define RANGE (1.0)
-#define ITERATION (100)
+#define ITERATION (500)
 
 /*readonly*/ CProxy_Main mainProxy;
 /*readonly*/ CProxy_Cell cellProxy;
@@ -45,7 +45,7 @@ class Main: public CBase_Main {
 
 						//setup liveViz
 						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
-						liveVizConfig cfg(liveVizConfig::pix_color, true);
+						liveVizConfig cfg(liveVizConfig::pix_color, false);
 						liveVizInit(cfg, id, liveViz_cb);
 
 						cellProxy.run();
@@ -122,7 +122,7 @@ class Cell: public CBase_Cell {
 				void requestNextFrame(liveVizRequestMsg * m){
 					double cell_width = RANGE/cellDimension;
 
-					int block_width = 200;
+					int block_width = 100;
 					int sx = thisIndex.x * block_width;
 					int sy = thisIndex.y * block_width;
 

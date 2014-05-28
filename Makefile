@@ -3,7 +3,7 @@ TESTOPTS = ++local
 
 OBJS = particle.o
 
-N = 10000
+N = 5000
 K = 8
 
 all: particle
@@ -17,7 +17,7 @@ particle.decl.h: particle.ci
 clean:
 	rm -f *.decl.h *.def.h conv-host *.o particle charmrun
 
-cleanp:
+cleanp: clean
 	rm -f *.sts *.gz *.projrc *.topo *.out
 
 particle.o: particle.C particle.decl.h

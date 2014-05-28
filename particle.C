@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <vector>
+#include "liveViz.h"
 #include "pup_stl.h"
 #include "Particle.h"
 #include "ParticleExercise.decl.h"
@@ -11,6 +12,8 @@
 /*readonly*/ CProxy_Cell cellProxy;
 /*readonly*/ int elementsPerCell;
 /*readonly*/ int cellDimension;
+
+CkArrayID id;
 
 using namespace std;
 
@@ -31,12 +34,19 @@ class Main: public CBase_Main {
 						cellDimension = atoi(m->argv[2]);
 						delete m;
 
-						//create the grid and start the simulation byb calling run()
+						//create the grid and start the simulation by calling run()
 						cellProxy = CProxy_Cell::ckNew(cellDimension, cellDimension);
+						//CkArrayOptions opts(cellDimension, cellDimension);
+						//cellProxy = CProxy_Type::ckNew(opts);
 						
 						//Create a reduction callback
-						CkCallback * cb = new CkCallback(CkReductionTarget(Main, myReduction), mainProxy);
-						cellProxy.ckSetReductionClient(cb);
+						CkCallback * reduction_cb = new CkCallback(CkReductionTarget(Main, myReduction), mainProxy);
+						cellProxy.ckSetReductionClient(reduction_cb);
+
+						//setup liveViz
+						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
+						liveVizConfig cfg(liveVizConfig::pix_color, true);
+						liveVizInit(cfg, id, liveViz_cb);
 
 						cellProxy.run();
 				}
@@ -106,6 +116,51 @@ class Cell: public CBase_Cell {
 						}
 						//update particles remaining current cell
 						particles = O; //This is varibale "O" not 0.
+
+				}
+
+				void requestNextFrame(liveVizRequestMsg * m){
+					double cell_width = RANGE/cellDimension;
+
+					int block_width = 200;
+					int sx = thisIndex.x * block_width;
+					int sy = thisIndex.y * block_width;
+
+
+					int len = 3*block_width*block_width;
+					unsigned char * intensity = new unsigned char[len];
+
+					for(int i = 0; i < len; i++){
+						intensity[i] = 255;
+					}
+					for(int i = 0; i < particles.size(); i++){
+						//CkPrintf("Floating point:%f, %f, %d\n", particles[i].x, particles[i].y, particles[i].color);
+						int currX = (int)((particles[i].x - xMin)*block_width/cell_width);
+						int currY = (int)((particles[i].y - yMin)*block_width/cell_width);
+						int color = particles[i].color;
+						int coord = 3*(currY * block_width + currX);
+						if(color == RED){
+							//Not colored by other colors yet, don't want to color 2 pixel twice, or it will become black.
+							if(intensity[coord] != 0){
+								intensity[coord + 1] = 0;
+								intensity[coord + 2] = 0;
+							}
+						}
+						else if(color == GREEN){
+							if(intensity[coord + 1] != 0){
+								intensity[coord + 0] = 0;
+								intensity[coord + 2] = 0;	
+							}
+						}
+						else{
+							if(intensity[coord + 2] != 0){
+								intensity[coord + 0] = 0;
+								intensity[coord + 1] = 0;
+							}
+						}
+					}
+					liveVizDeposit(m, sx, sy, block_width, block_width, intensity, this);
+					delete [] intensity;
 
 				}
 
@@ -189,7 +244,7 @@ class Cell: public CBase_Cell {
 
 						if(newY > RANGE) newY -= 1.0;
 						else if(newY < 0.0) newY += 1.0;
-						Particle temp(newX, newY);
+						Particle temp(newX, newY, particle->color);
 
 						// put the particle into the correct vector to be sended
 						if(y > yMax) {

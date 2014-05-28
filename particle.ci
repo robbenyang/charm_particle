@@ -59,5 +59,8 @@
 
         atomic{ mainProxy.done(); }
     };
+
+    //An entry method for liveViz library
+    entry void requestNextFrame(liveVizRequestMsg * m);
   };
 };

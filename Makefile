@@ -9,7 +9,7 @@ K = 8
 all: particle
 
 particle: $(OBJS)
-	$(CHARMC) -O3 -language charm++ -module CommonLBs -tracemode projections -o particle $(OBJS)
+	$(CHARMC) -O3 -language charm++ -module CommonLBs -module liveViz -tracemode projections -o particle $(OBJS)
 
 particle.decl.h: particle.ci
 	$(CHARMC)  particle.ci
@@ -34,3 +34,6 @@ test_refine:
 
 test_refineswap:
 	./charmrun particle $(N) $(K) $(TESTOPTS) +balancer RefineSwapLB +LBDebug 1 +p4
+
+server:
+	./charmrun +p1 particle $(N) $(K) $(TESTOPTS) ++server ++server-port 1234

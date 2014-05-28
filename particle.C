@@ -8,6 +8,8 @@
 #define RANGE (1.0)
 #define ITERATION (500)
 
+#define CELL_WIDTH 100
+
 /*readonly*/ CProxy_Main mainProxy;
 /*readonly*/ CProxy_Cell cellProxy;
 /*readonly*/ int elementsPerCell;
@@ -122,7 +124,7 @@ class Cell: public CBase_Cell {
 				void requestNextFrame(liveVizRequestMsg * m){
 					double cell_width = RANGE/cellDimension;
 
-					int block_width = 100;
+					int block_width = CELL_WIDTH;
 					int sx = thisIndex.x * block_width;
 					int sy = thisIndex.y * block_width;
 

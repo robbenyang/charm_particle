@@ -41,14 +41,15 @@ class Main: public CBase_Main {
 						//CkArrayOptions opts(cellDimension, cellDimension);
 						//cellProxy = CProxy_Type::ckNew(opts);
 						
+						
+						//setup liveViz
+						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
+						liveVizConfig cfg(liveVizConfig::pix_color, true);
+						liveVizInit(cfg, id, liveViz_cb);
+
 						//Create a reduction callback
 						CkCallback * reduction_cb = new CkCallback(CkReductionTarget(Main, myReduction), mainProxy);
 						cellProxy.ckSetReductionClient(reduction_cb);
-
-						//setup liveViz
-						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
-						liveVizConfig cfg(liveVizConfig::pix_color, false);
-						liveVizInit(cfg, id, liveViz_cb);
 
 						cellProxy.run();
 				}
@@ -215,7 +216,7 @@ class Cell: public CBase_Cell {
 
 				void perturb(Particle* particle) {
 
-						float maxDelta = 0.01; //a const that determines the speed of the particle movement
+						float maxDelta = 0.1; //a const that determines the speed of the particle movement
 						double deltax = drand48()*maxDelta - maxDelta/2.0;
 						double deltay = drand48()*maxDelta - maxDelta/2.0;
 

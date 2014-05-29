@@ -42,9 +42,12 @@
 
               if(iteration % 10 == 0){
                 atomic {
+                  if(thisIndex.x == 0 && thisIndex.y == 0){
+                    CkPrintf("At iteration %d\n", iteration);
+                  }
                   int numberParticles = particles.size();
                   //TODO: add contibute calls here
-    			        contribute(sizeof(int), &numberParticles, CkReduction::max_int);
+    			  //      contribute(sizeof(int), &numberParticles, CkReduction::max_int);
                   AtSync();
                 }
                 when ResumeFromSync(){ }

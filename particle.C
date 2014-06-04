@@ -136,6 +136,9 @@ class Cell: public CBase_Cell {
 					for(int i = 0; i < len; i++){
 						intensity[i] = 255;
 					}
+
+
+					//Draw particles on the canvas
 					for(int i = 0; i < particles.size(); i++){
 						//CkPrintf("Floating point:%f, %f, %d\n", particles[i].x, particles[i].y, particles[i].color);
 						int currX = (int)((particles[i].x - xMin)*block_width/cell_width);
@@ -162,6 +165,26 @@ class Cell: public CBase_Cell {
 							}
 						}
 					}
+					
+					int addConst = 3 * block_width; //Define this to avoid unnecessary calculation
+					//Draw verticle lines
+					if(thisIndex.x != 0){
+						for(int i = addConst; i < len; i += addConst) {
+							intensity[i] = 0;
+							intensity[i+1] = 0;
+							intensity[i+2] = 0;
+						}
+					}
+
+					//Draw horizontal lines
+					if(thisIndex.y + 1 != cellDimension){
+						for(int i = 3 * block_width * (block_width - 1); i < len; i++){
+							intensity[i] = 0;
+							intensity[i+1] = 0;
+							intensity[i+2] = 0;
+						}
+					}
+
 					liveVizDeposit(m, sx, sy, block_width, block_width, intensity, this);
 					delete [] intensity;
 
@@ -216,7 +239,7 @@ class Cell: public CBase_Cell {
 
 				void perturb(Particle* particle) {
 
-						float maxDelta = 0.1; //a const that determines the speed of the particle movement
+						float maxDelta = 0.01; //a const that determines the speed of the particle movement
 						double deltax = drand48()*maxDelta - maxDelta/2.0;
 						double deltay = drand48()*maxDelta - maxDelta/2.0;
 

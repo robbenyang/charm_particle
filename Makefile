@@ -1,4 +1,4 @@
-CHARMC = /dcsdata/home/zyang/Charm/charm/bin/charmc $(OPTS)
+CHARMC = /home/zyang/Charm/charm/bin/charmc $(OPTS)
 TESTOPTS = ++local
 
 OBJS = particle.o

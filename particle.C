@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <vector>
-#include "liveViz.h"
 #include "pup_stl.h"
 #include "Particle.h"
 #include "ParticleExercise.decl.h"
+#include "liveViz.h"
 
 #define RANGE (1.0)
-#define ITERATION (2000)
+#define ITERATION (200)
 
 #define CELL_WIDTH 100
 
@@ -37,14 +37,15 @@ class Main: public CBase_Main {
 						delete m;
 
 						//create the grid and start the simulation by calling run()
+<<<<<<< HEAD
 						//cellProxy = CProxy_Cell::ckNew(cellDimension, cellDimension);
 						CkArrayOptions opts(cellDimension, cellDimension);
 						cellProxy = CProxy_Cell::ckNew(opts);
 						
-						
 						//setup liveViz
 						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
 						liveVizConfig cfg(liveVizConfig::pix_color, true);
+<<<<<<< HEAD
 						liveVizInit(cfg, cellProxy, liveViz_cb, opts);
 
 						//Create a reduction callback

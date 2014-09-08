@@ -6,7 +6,7 @@
 #include "ParticleExercise.decl.h"
 
 #define RANGE (1.0)
-#define ITERATION (500)
+#define ITERATION (2000)
 
 #define CELL_WIDTH 100
 
@@ -37,15 +37,15 @@ class Main: public CBase_Main {
 						delete m;
 
 						//create the grid and start the simulation by calling run()
-						cellProxy = CProxy_Cell::ckNew(cellDimension, cellDimension);
-						//CkArrayOptions opts(cellDimension, cellDimension);
-						//cellProxy = CProxy_Type::ckNew(opts);
+						//cellProxy = CProxy_Cell::ckNew(cellDimension, cellDimension);
+						CkArrayOptions opts(cellDimension, cellDimension);
+						cellProxy = CProxy_Cell::ckNew(opts);
 						
 						
 						//setup liveViz
 						CkCallback liveViz_cb(CkIndex_Cell::requestNextFrame(0), cellProxy);//Not sure how it works
 						liveVizConfig cfg(liveVizConfig::pix_color, true);
-						liveVizInit(cfg, id, liveViz_cb);
+						liveVizInit(cfg, cellProxy, liveViz_cb, opts);
 
 						//Create a reduction callback
 						CkCallback * reduction_cb = new CkCallback(CkReductionTarget(Main, myReduction), mainProxy);
